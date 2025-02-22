@@ -5,17 +5,18 @@ FROM python:3.11.7
 WORKDIR /app
 
 # Copy requirements and install dependencies
-COPY ./frontend/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt .
+RUN python -m venv /opt/venv && \
+    /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy the Streamlit application code
-COPY ./frontend/app.py .
+COPY app.py .
 
 # Ensure Streamlit config directory exists
 RUN mkdir -p /root/.streamlit
-
-# Copy the Streamlit configuration file
-COPY ./frontend/config.toml /root/.streamlit/config.toml
+COPY config.toml /root/.streamlit/config.toml
+RUN chmod -R 777 /root/.streamlit
 
 # Expose the port Streamlit runs on
 EXPOSE 8501

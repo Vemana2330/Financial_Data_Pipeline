@@ -16,7 +16,7 @@ if page == "🏠 Home":
     st.title("📊 Financial Data Processing Pipeline")
     st.write(
         """
-        This project automates the **ETL** process for financial data by scraping data from a website, storing it in **AWS S3**, then extracting, transforming, and loading it into **Snowflake** using **Airflow** DAGs. It features a **Streamlit** frontend and a **FastAPI** backend, with each component containerized using **Docker** and deployed on **Google Cloud Run** for scalability and efficiency. \n
+        This project automates the **ETL** process for financial data by scraping data from a website, storing it in **AWS S3**, then extracting, transforming, and loading it into **Snowflake** using **Airflow** DAGs. It features a **Streamlit** frontend and a **FastAPI** backend, with each component containerized using **Docker** and deployed on **Digital Ocean** for scalability and efficiency. \n
         
         **Aim:** A master financial statement database to support analysts conducting fundamental analysis of US public companies.\n
         
@@ -64,7 +64,7 @@ if page == "🏠 Home":
     st.subheader("Automation, Application and Deployment")
     steps_data3 = {
         "Steps": ["Orchestrate 3 DAGs for data processing", "Develop a frontend and backend application", "Deploy on Cloud"],
-        "Tools Used": ["Airflow, Bash Operator, Docker-Compose.yaml", "Streamlit, FastAPI", "Google Cloud Run, Docker"]
+        "Tools Used": ["Airflow, Bash Operator, Docker-Compose.yaml", "Streamlit, FastAPI", "Digital Ocean, Docker"]
     }
     df_raw3 = pd.DataFrame(steps_data3)
     df_raw3.index = df_raw3.index + 1  # Start index from 1

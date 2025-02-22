@@ -32,6 +32,7 @@ x-airflow-common:
     SNOWFLAKE_SCHEMA: ${SNOWFLAKE_SCHEMA}
     SNOWFLAKE_DBT_ROLE: ${SNOWFLAKE_DBT_ROLE}
     SNOWFLAKE_SCHEMA_DBT: ${SNOWFLAKE_SCHEMA_DBT}
+    AIRFLOW_UID: ${AIRFLOW_UID:-50000}  # ✅ Added to fix missing variable warning
 
   volumes:
     - ./airflow/dags:/opt/airflow/dags
@@ -78,8 +79,8 @@ services:
 
   airflow-webserver:
     build:
-      context: .
-      dockerfile: ./airflow/Dockerfile
+      context: ./airflow  # ✅ Fixed build context path to ensure Dockerfile is found
+      dockerfile: Dockerfile
     <<: *airflow-common
     command: webserver
     ports:
@@ -103,6 +104,9 @@ services:
     user: "${AIRFLOW_UID:-50000}:0"
 
   airflow-scheduler:
+    build:
+      context: ./airflow  # ✅ Fixed build context path to ensure Dockerfile is found
+      dockerfile: Dockerfile
     <<: *airflow-common
     command: scheduler
     restart: always
@@ -116,6 +120,9 @@ services:
     user: "${AIRFLOW_UID:-50000}:0"
 
   airflow-worker:
+    build:
+      context: ./airflow  # ✅ Fixed build context path to ensure Dockerfile is found
+      dockerfile: Dockerfile
     <<: *airflow-common
     command: celery worker
     restart: always
@@ -129,6 +136,9 @@ services:
     user: "${AIRFLOW_UID:-50000}:0"
 
   airflow-triggerer:
+    build:
+      context: ./airflow  # ✅ Fixed build context path to ensure Dockerfile is found
+      dockerfile: Dockerfile
     <<: *airflow-common
     command: triggerer
     restart: always
@@ -142,6 +152,9 @@ services:
     user: "${AIRFLOW_UID:-50000}:0"
 
   airflow-init:
+    build:
+      context: ./airflow  # ✅ Fixed build context path to ensure Dockerfile is found
+      dockerfile: Dockerfile
     <<: *airflow-common
     entrypoint: /bin/bash
     command:
@@ -163,6 +176,9 @@ services:
     user: "0:0"
 
   airflow-cli:
+    build:
+      context: ./airflow  # ✅ Fixed build context path to ensure Dockerfile is found
+      dockerfile: Dockerfile
     <<: *airflow-common
     profiles:
       - debug
@@ -194,8 +210,8 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: ./backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: backend
     ports:
       - "8000:8000"
@@ -221,8 +237,8 @@ services:
 
   frontend:
     build:
-      context: .
-      dockerfile: ./frontend/Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: frontend
     ports:
       - "8501:8501"
