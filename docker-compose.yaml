@@ -17,13 +17,11 @@ x-airflow-common:
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     DBT_PROJECT_DIR: /opt/airflow/dbt_data_pipeline
     DBT_PROFILES_DIR: /opt/airflow/dbt_data_pipeline/config
- 
+
     # AWS S3 & Snowflake Credentials from .env file
     AWS_BUCKET_NAME: ${AWS_BUCKET_NAME}
-    #AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-    #AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
     AWS_REGION: ${AWS_REGION}
- 
+
     # Snowflake Connection
     SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT}
     SNOWFLAKE_USER: ${SNOWFLAKE_USER}
@@ -34,7 +32,7 @@ x-airflow-common:
     SNOWFLAKE_SCHEMA: ${SNOWFLAKE_SCHEMA}
     SNOWFLAKE_DBT_ROLE: ${SNOWFLAKE_DBT_ROLE}
     SNOWFLAKE_SCHEMA_DBT: ${SNOWFLAKE_SCHEMA_DBT}
- 
+
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./airflow/logs:/opt/airflow/logs
@@ -47,7 +45,7 @@ x-airflow-common:
       condition: service_healthy
     postgres:
       condition: service_healthy
- 
+
 services:
   postgres:
     image: postgres:13
@@ -63,7 +61,8 @@ services:
       retries: 5
       start_period: 5s
     restart: always
- 
+    user: "0:0"
+
   redis:
     image: redis:7.2-bookworm
     expose:
@@ -75,10 +74,11 @@ services:
       retries: 50
       start_period: 30s
     restart: always
- 
+    user: "0:0"
+
   airflow-webserver:
     build:
-      context: . # Ensure the context is correct
+      context: .
       dockerfile: ./airflow/Dockerfile
     <<: *airflow-common
     command: webserver
@@ -98,19 +98,13 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
- 
+    volumes:
+      - ./logs:/opt/airflow/logs
+    user: "${AIRFLOW_UID:-50000}:0"
+
   airflow-scheduler:
-    build:
-      context: . # Ensure the context is correct
-      dockerfile: ./airflow/Dockerfile
     <<: *airflow-common
     command: scheduler
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8081/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
     restart: always
     depends_on:
       redis:
@@ -119,11 +113,9 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
- 
+    user: "${AIRFLOW_UID:-50000}:0"
+
   airflow-worker:
-    build:
-      context: . # Ensure the context is correct
-      dockerfile: ./airflow/Dockerfile
     <<: *airflow-common
     command: celery worker
     restart: always
@@ -134,11 +126,9 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
- 
+    user: "${AIRFLOW_UID:-50000}:0"
+
   airflow-triggerer:
-    build:
-      context: . # Ensure the context is correct
-      dockerfile: ./airflow/Dockerfile
     <<: *airflow-common
     command: triggerer
     restart: always
@@ -149,11 +139,9 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
- 
+    user: "${AIRFLOW_UID:-50000}:0"
+
   airflow-init:
-    build:
-      context: . # Ensure the context is correct
-      dockerfile: ./airflow/Dockerfile
     <<: *airflow-common
     entrypoint: /bin/bash
     command:
@@ -164,6 +152,7 @@ services:
         fi
         mkdir -p /sources/logs /sources/dags /sources/plugins
         chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins}
+        chmod -R 777 /sources/logs /sources/dags /sources/plugins
         exec /entrypoint airflow version
     environment:
       <<: *airflow-common-env
@@ -172,11 +161,8 @@ services:
       _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
     user: "0:0"
- 
+
   airflow-cli:
-    build:
-      context: . # Ensure the context is correct
-      dockerfile: ./airflow/Dockerfile
     <<: *airflow-common
     profiles:
       - debug
@@ -187,7 +173,8 @@ services:
       - bash
       - -c
       - airflow
- 
+    user: "${AIRFLOW_UID:-50000}:0"
+
   flower:
     <<: *airflow-common
     command: celery flower
@@ -203,7 +190,8 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
-  
+    user: "${AIRFLOW_UID:-50000}:0"
+
   backend:
     build:
       context: .
@@ -229,7 +217,8 @@ services:
       retries: 3
       start_period: 5s
     restart: unless-stopped
-  
+    user: "0:0"
+
   frontend:
     build:
       context: .
@@ -249,6 +238,7 @@ services:
       retries: 3
       start_period: 10s
     restart: unless-stopped
-  
+    user: "0:0"
+
 volumes:
   postgres-db-volume:
