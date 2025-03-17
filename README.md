@@ -24,11 +24,13 @@ FastAPI: http://138.197.102.155:8000/docs <br>
 
 1. Financial Data Pipeline
 
-![Diagram_Data_Pipeline](https://github.com/user-attachments/assets/0cd28863-4c53-43b1-af5a-28cbc3b9c076)
+![Diagram_Data_Pipeline](https://github.com/user-attachments/assets/1e4c6ffd-8c06-482f-bd3d-c109e02e5048)
+
 
 2. Application and Deployment
 
-![Diagram_Application_Deployment](https://github.com/user-attachments/assets/c3eadcb6-96af-4082-9874-2a917f5d51a2)
+![Diagram_Application_Deployment](https://github.com/user-attachments/assets/851ee4ad-5e5d-4d86-a740-cae378a15882)
+
 
 ## Directory Structure
 ```
